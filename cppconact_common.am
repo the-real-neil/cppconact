@@ -1,0 +1,21 @@
+# $(top_srcdir)/capsycon_common.am
+
+# common automake definitions
+
+AM_CPPFLAGS = -DFUSION_MAX_VECTOR_SIZE=20			\
+-DBOOST_SPIRIT_USE_PHOENIX_V3 -DBOOST_SYSTEM_NO_DEPRECATED	\
+-I$(top_srcdir) $(BOOST_CPPFLAGS)
+
+AM_CXXFLAGS = -std=gnu++0x -g -pipe -fPIC -trigraphs -Werror -Wall	\
+-Wextra -Weffc++ -Wconversion -Wno-system-headers -pthread
+
+# AM_CFLAGS = $(ORB_CFLAGS)
+# # AM_CXXFLAGS = $(ORB_CXXFLAGS)
+# # AM_CPPFLAGS = $(ORB_CPPFLAGS)
+# AM_LDFLAGS = $(ORB_LDFLAGS)
+# LDADD = $(ORB_LIBS)
+
+# IDL_HEADER_EXT = hpp
+# IDL_SOURCE_EXT = cpp
+# IDL_CLIENT_SUFFIX = _stub
+# IDL_SERVER_SUFFIX = _skel
