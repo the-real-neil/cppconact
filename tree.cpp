@@ -100,67 +100,63 @@ int traverse_step( visit&v,
 
 
 
+typedef std::vector< Node const* >Stack;
+
+
+
+void advance( visit const&ord,
+              visit&vis,
+              Stack&stack )
+{
+    do{
+        traverse_step( vis, stack );
+        /* std::cout */
+        /*     << "visit_ == " << visit_ << std::endl ; */
+        /* using namespace boost::phoenix; */
+        /* using namespace boost::phoenix::arg_names; */
+        /* std::for_each( stack_.begin(), stack_.end(), std::cout << arg1 << "," ); */
+        /* std::cout << std::endl ; */
+        if( ord == vis ) return;
+    }while( ! ( 1 == stack.size() && post == vis ) );
+    stack.clear();
+}
+
 class iter
 {
-    typedef std::vector< Node const* >Stack;
-    Stack stack_;
     visit order_,visit_;
-    
-    void past_last( void )
+    Stack stack_;
+
+    visit init_visit_( Node const*p )
     {
-        stack_.clear();
-        order_ = in;
-        visit_ = pre;
+        return empty( p ) ? post : pre ;
     }
 
-    void advance( void )
+    Stack init_stack_( Node const*p )
     {
-        do{
-            traverse_step( visit_, stack_ );
-            /* std::cout */
-            /*     << "visit_ == " << visit_ << std::endl ; */
-            /* using namespace boost::phoenix; */
-            /* using namespace boost::phoenix::arg_names; */
-            /* std::for_each( stack_.begin(), stack_.end(), std::cout << arg1 << "," ); */
-            /* std::cout << std::endl ; */
-            if( order_ == visit_ ) return;
-        }while( ! ( 1 == stack_.size() && post == visit_ ) );
-        stack_.clear();
+        Stack ret;
+        if( ! empty( p ) ){
+            ret.push_back( p );
+            advance( order_, visit_, ret );
+        }
+        return ret;
     }
-
 public:
     /* dtor */
     virtual ~iter( void ){}
 
     /* ctor */
     explicit iter( Node const*p = NULL, visit const&order = in )
-        :stack_ ( p ? Stack( 1, p ) : Stack( 0 ) )
-        ,order_ ( order           )
-        ,visit_ ( p ? pre : post  )
-    {
-        /* do this to get past the root on the first dereference */
-        if( 0 < stack_.size() ) advance();
-    }
-
-    /* copy ctor */
-    iter( iter const&nit )
-        :stack_( nit.stack_ )
-        ,order_( nit.order_ )
-        ,visit_( nit.visit_ )
+        :order_( order )
+        ,visit_( init_visit_( p ) )
+        ,stack_( init_stack_( p ) )
     {}
-    /* assignment op */
-    iter&operator=( iter const&nit )
-    {
-        stack_ = nit.stack_ ;
-        order_ = nit.order_ ;
-        visit_ = nit.visit_ ;
-        return*this;
-    }
 
     /* prefix autoincrement */
-    iter&operator++(){ advance(); return*this; }
+    iter&operator++(){ advance( order_, visit_, stack_ ); return*this; }
+
     /* postfix autoincrement */
     iter operator++(int){ iter ret(*this); operator++(); return ret; }
+
     /* equality */
     bool operator==( iter const&rhs )const
     {
@@ -174,8 +170,10 @@ public:
             return false;
         return true;
     }
+
     /* inequality */
     bool operator!=( iter const&rhs )const{ return ! operator==(rhs); }
+
     /* dereference */
     Node const&operator*(void){ return *stack_.back(); }
 };
@@ -206,7 +204,12 @@ int main( int, char** )
 
     std::for_each( begin( tree ), end( tree ), foo );
 
+    Node*o = new Node('O');
+    std::for_each( begin(o), end(o), foo );
+
     delete tree;
+    delete o;
     std::cout << std::endl ;
+
     return 0;
 }
